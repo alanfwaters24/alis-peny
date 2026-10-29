@@ -1,0 +1,57 @@
+name: Build P.E.N.Y Windows Installer
+
+# Builds the Windows installer (.exe) on a free Windows machine provided by
+# GitHub, then attaches it to a Release so it is easy to download.
+#
+# Run it: Actions tab -> "Build P.E.N.Y Windows Installer" -> Run workflow.
+# (It also runs automatically whenever you upload changes.)
+# Download: the repo's "Releases" section (right-hand side) -> the .exe file.
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check all app files are present
+        shell: bash
+        run: |
+          for f in main.js package.json backend/server.js backend/db.js backend/auth.js frontend/index.html icon.ico; do
+            if [ ! -f "$f" ]; then echo "MISSING FILE: $f - upload it to the repo and run again"; exit 1; fi
+          done
+          echo "All app files present"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build installer
+        run: npm run dist
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Keep a copy as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: peny-windows-installer
+          path: dist/*.exe
+
+      - name: Publish release with the installer
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}-build${{ github.run_number }}"
+          gh release create "$TAG" dist/*.exe --title "P.E.N.Y $VERSION (build ${{ github.run_number }})" --notes "Unsigned Windows installer. If SmartScreen warns: More info, then Run anyway."
