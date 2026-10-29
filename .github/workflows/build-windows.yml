@@ -1,11 +1,8 @@
 name: Build P.E.N.Y Windows Installer
 
-# Builds the Windows installer (.exe) on a free Windows machine provided by
-# GitHub, then attaches it to a Release so it is easy to download.
-#
-# Run it: Actions tab -> "Build P.E.N.Y Windows Installer" -> Run workflow.
-# (It also runs automatically whenever you upload changes.)
-# Download: the repo's "Releases" section (right-hand side) -> the .exe file.
+# Builds the Windows installer on a free GitHub Windows machine, starts the
+# app once as a test, and only publishes a Release if the app really runs.
+# Works whether the files were uploaded in folders or all at the top level.
 
 on:
   push:
@@ -15,15 +12,48 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: peny-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Put files into backend and frontend folders
+        run: |
+          mkdir -p backend frontend
+          for f in server.js db.js auth.js forecast.js pensions.js investments.js growth.js reports.js importers.js exporters.js gocardless.js; do
+            if [ -f "$f" ]; then mv -f "$f" backend/; fi
+          done
+          for f in index.html sw.js manifest.json icon-192.png icon-512.png; do
+            if [ -f "$f" ]; then mv -f "$f" frontend/; fi
+          done
+          rm -f package-lock.json
+          echo "backend:";  ls backend
+          echo "frontend:"; ls frontend
+
+      - name: Check all app files are present
+        run: |
+          missing=0
+          for f in main.js package.json icon.ico \
+                   backend/server.js backend/db.js backend/auth.js backend/forecast.js backend/pensions.js \
+                   backend/investments.js backend/growth.js backend/reports.js backend/importers.js \
+                   backend/exporters.js backend/gocardless.js \
+                   frontend/index.html frontend/sw.js frontend/manifest.json; do
+            if [ ! -f "$f" ]; then echo "MISSING FILE: $f"; missing=1; fi
+          done
+          if [ "$missing" -ne 0 ]; then echo "Upload the missing files and run again."; exit 1; fi
+          echo "All app files present"
 
       - name: Install dependencies
         run: npm install
@@ -33,6 +63,31 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
+      - name: Test - start the app and check it answers
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "dist/win-unpacked" -Filter "*.exe" | Where-Object { $_.Name -notlike "Uninstall*" } | Select-Object -First 1
+          Write-Host "Starting $($exe.FullName)"
+          $p = Start-Process -FilePath $exe.FullName -PassThru
+          $ok = $false
+          for ($i = 0; $i -lt 45; $i++) {
+            Start-Sleep -Seconds 1
+            try {
+              $r = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:4278/api/health" -TimeoutSec 2
+              if ($r.StatusCode -eq 200) { Write-Host "Engine OK: $($r.Content)"; $ok = $true; break }
+            } catch {}
+          }
+          if ($ok) {
+            try {
+              $page = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:4278/" -TimeoutSec 5
+              if ($page.Content -like "*P.E.N*") { Write-Host "Front page OK" } else { Write-Host "Front page looks wrong"; $ok = $false }
+            } catch { Write-Host "Front page did not load"; $ok = $false }
+          }
+          $log = Join-Path $env:APPDATA "P.E.N.Y\startup.log"
+          if (Test-Path $log) { Write-Host "---- startup.log ----"; Get-Content $log }
+          Get-Process | Where-Object { $_.Path -like "*win-unpacked*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+          if (-not $ok) { throw "P.E.N.Y did not start - see the log above. No release was published." }
+
       - name: Keep a copy as a build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -40,10 +95,9 @@ jobs:
           path: dist/*.exe
 
       - name: Publish release with the installer
-        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION=$(node -p "require('./package.json').version")
           TAG="v${VERSION}-build${{ github.run_number }}"
-          gh release create "$TAG" dist/*.exe --title "P.E.N.Y $VERSION (build ${{ github.run_number }})" --notes "Unsigned Windows installer. If SmartScreen warns: More info, then Run anyway."
+          gh release create "$TAG" dist/*.exe --title "P.E.N.Y $VERSION (build ${{ github.run_number }}) - tested" --notes "Tested: the app started and answered on this build machine before publishing. Unsigned installer - if SmartScreen warns, click More info, then Run anyway."
