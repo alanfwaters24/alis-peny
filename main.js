@@ -1,7 +1,7 @@
 // main.js — turns P.E.N.Y into a normal Windows program.
 // Starts the same backend used on the server edition, pointed at a data
 // folder in the user's own profile, and opens it in a desktop window.
-// v1.8.2: shows a clear error box (and writes startup.log) instead of
+// Shows a clear error box (and writes startup.log) instead of
 // failing silently, and waits for the backend to be ready before opening.
 
 const { app, BrowserWindow, shell, dialog } = require('electron');
@@ -29,7 +29,10 @@ function fail(title, err) {
 process.on('uncaughtException', (err) => fail('Unexpected error', err));
 process.on('unhandledRejection', (err) => fail('Unexpected error', err));
 
-if (!app.requestSingleInstanceLock()) { app.quit(); }
+if (!app.requestSingleInstanceLock()) {
+  // Another copy is already running — it will bring its window to the front (see 'second-instance').
+  app.quit();
+}
 
 // Data lives under the normal Windows AppData folder, e.g.
 // C:\Users\<name>\AppData\Roaming\P.E.N.Y\data — back it up like any important files.
@@ -37,6 +40,7 @@ process.env.PENY_DATA_DIR = path.join(app.getPath('userData'), 'data');
 process.env.SERVE_STATIC_FROM = path.join(__dirname, 'frontend');
 process.env.PORT = String(PORT);
 process.env.LISTEN_HOST = '127.0.0.1'; // this PC only
+process.env.PENY_EDITION = 'Windows Edition';
 
 let mainWindow;
 

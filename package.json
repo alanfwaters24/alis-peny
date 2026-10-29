@@ -1,7 +1,7 @@
 {
   "name": "peny-windows",
   "productName": "P.E.N.Y",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "description": "P.E.N.Y \u2014 Personal Expense & Net-worth Yield tracker (ALIS OS, standalone Windows edition)",
   "main": "main.js",
   "scripts": {

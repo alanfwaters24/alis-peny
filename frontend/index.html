@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>P.E.N.Y — ALIS Money</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05100D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #05100D;
+    --surface:     rgba(255,255,255,0.05);
+    --card:        #0B1F19;
+    --border:      rgba(94,234,212,0.18);
+    --green:       #5EEAD4;
+    --green-dim:   #2DD4BF;
+    --cyan:        #22D3EE;
+    --cyan-dim:    #22D3EE;
+    --amber:       #FBBF24;
+    --red:         #F87171;
+    --text:        #E8F5F0;
+    --text-muted:  #8A9A96;
+    --font-ui:     'Rajdhani', 'Noto Color Emoji', 'Segoe UI', Arial, sans-serif;
+    --font-mono:   'Share Tech Mono', 'Noto Color Emoji', 'Courier New', monospace;
+    --font-head:   'Exo 2', 'Noto Color Emoji', 'Segoe UI', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 76px;
+  }
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: linear-gradient(180deg, var(--bg) 80%, transparent);
+    padding: 18px 18px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.top .header-left { padding-right: 110px; }
+  .brand { font-family: var(--font-head); font-size: 26px; font-weight: 700; letter-spacing: 3px; color: var(--green); }
+  .brand span { color: var(--cyan); }
+  .brand-sub { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+  main { padding: 16px; max-width: 720px; margin: 0 auto; }
+  .screen { display: none; animation: fadeIn .2s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .card h2 {
+    font-family: var(--font-head); font-size: 15px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase; color: var(--cyan);
+    margin-bottom: 12px;
+  }
+  .net-worth-figure { font-family: var(--font-mono); font-size: 40px; color: var(--green); letter-spacing: 1px; }
+  .net-worth-figure.negative { color: var(--red); }
+  .sub-figure { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: none; }
+  .row .label { font-size: 14px; }
+  .row .value { font-family: var(--font-mono); font-size: 14px; color: var(--green); }
+  .row .value.neg { color: var(--red); }
+  .muted { color: var(--text-muted); font-size: 12px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  button, .btn {
+    font-family: var(--font-ui); font-weight: 600; font-size: 13px;
+    background: transparent; color: var(--green); border: 1px solid var(--green-dim);
+    border-radius: 8px; padding: 10px 14px; cursor: pointer; letter-spacing: 0.5px;
+  }
+  button:active { background: rgba(94,234,212,0.14); }
+  button.primary { background: var(--green); color: #05100D; border: none; }
+  button.ghost { border-color: var(--border); color: var(--text-muted); }
+  button.danger { border-color: var(--red); color: var(--red); }
+  button.block { width: 100%; }
+
+  input, select, textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: var(--font-ui); font-size: 14px; padding: 10px; border-radius: 8px; margin-bottom: 10px;
+  }
+  label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px; letter-spacing: .5px; text-transform: uppercase; }
+
+  nav.bottom {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+    background: var(--surface); border-top: 1px solid var(--border);
+    display: flex; padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  nav.bottom button {
+    flex: 1; border: none; background: none; color: var(--text-muted);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 8px 2px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  nav.bottom button.active { color: var(--green); }
+  nav.bottom .icon { font-size: 18px; }
+
+  .fab {
+    position: fixed; right: 18px; bottom: 88px; z-index: 20;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--green); color: #05100D; font-size: 26px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px rgba(0,230,118,0.35); border: none;
+  }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 30;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px 16px 0 0;
+    width: 100%; max-width: 480px; padding: 20px; max-height: 88vh; overflow-y: auto;
+  }
+  .modal h3 { font-family: var(--font-head); color: var(--cyan); letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase; font-size: 16px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
+  .modal-actions button { flex: 1; }
+
+  .empty { text-align: center; padding: 30px 10px; color: var(--text-muted); font-size: 13px; }
+
+  canvas#forecastChart { width: 100%; height: 180px; display: block; }
+
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-family: var(--font-mono); border: 1px solid var(--border); color: var(--text-muted); }
+  .pill.linked { border-color: var(--cyan-dim); color: var(--cyan); }
+
+  .toast {
+    position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+    background: var(--card); border: 1px solid var(--green-dim); color: var(--green);
+    padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 50;
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ---------- Login / Auth ---------- */
+  #authScreen {
+    position: fixed; inset: 0; z-index: 100; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px;
+  }
+  #authScreen .brand { font-size: 40px; margin-bottom: 4px; }
+  #authScreen .brand-sub { font-size: 12px; margin-bottom: 30px; }
+  #authScreen .card { width: 100%; max-width: 360px; }
+  .auth-error { color: var(--red); font-size: 12px; margin: -4px 0 10px; min-height: 14px; }
+  .auth-switch { text-align: center; margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+  .auth-switch a { color: var(--cyan); text-decoration: none; }
+
+  /* ---------- Sync indicator ---------- */
+  .sync-indicator {
+    display: flex; align-items: center; gap: 6px; font-family: var(--font-mono);
+    font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px;
+  }
+  header.top .sync-indicator { position: absolute; top: 20px; right: 18px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
+  .sync-dot.synced { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .sync-dot.syncing { background: var(--amber); animation: pulse 1s infinite; }
+  .sync-dot.none { background: var(--border); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ---------- Printable report ---------- */
+  #printReport { display: none; }
+  @media print {
+    body * { visibility: hidden; }
+    #printReport, #printReport * { visibility: visible; }
+    #printReport { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
+    @page { size: A4 landscape; margin: 12mm; }
+  }
+  #printReport { color: #111; background: #fff; font-family: Arial, sans-serif; padding: 10px; }
+  #printReport .print-header { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+  #printReport .print-logo { font-family: 'Rajdhani', Arial, sans-serif; font-size: 34px; font-weight: 700; letter-spacing: 2px; border: 2px solid #111; border-radius: 8px; padding: 6px 14px; }
+  #printReport h1 { font-size: 20px; margin-bottom: 2px; }
+  #printReport .meta { font-size: 11px; color: #555; }
+  #printReport .print-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  #printReport table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px; }
+  #printReport th, #printReport td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #ddd; }
+  #printReport th { background: #f0f0f0; }
+  #printReport .print-figure { font-size: 22px; font-weight: bold; }
+  #printReport h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #333; margin-bottom: 6px; border-bottom: 2px solid #333; padding-bottom: 3px; }
+</style>
+<style id="alis-glass-overrides">
+/* ============================================================
+   ALIS GLASS — applied to P.E.N.Y (visual layer only).
+   Tokens, glass cards, iridescent ring, glow blobs, cog and fonts follow
+   alis_glass_theme.css from the ALIS-CORE blueprint. Legacy variable names
+   (--green, --cyan, --card ...) are remapped in :root above so the
+   existing markup and scripts keep working unchanged.
+   ============================================================ */
+:root {
+  --alis-bg: #05100D;
+  --alis-teal: #2DD4BF;
+  --alis-teal-bright: #5EEAD4;
+  --alis-violet: #A78BFA;
+  --alis-violet-bright: #C4B5FD;
+  --alis-cyan-glow: #22D3EE;
+  --alis-text: #E8F5F0;
+  --alis-text-dim: #8A9A96;
+  --glass-grad-top: rgba(255,255,255,0.09);
+  --glass-grad-bottom: rgba(255,255,255,0.03);
+  --glass-border: rgba(94,234,212,0.18);
+  --glass-blur: 24px;
+  --glass-saturate: 160%;
+  --glass-radius: 14px;
+  --glass-inset-highlight: rgba(255,255,255,0.14);
+  --ring-duration: 7s;
+  --ring-width: 2px;
+  --font-mono: 'Share Tech Mono', 'Noto Color Emoji', Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* ---- Base + glow blobs ---- */
+body {
+  background: var(--alis-bg);
+  background-image: none;
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+  overflow-x: hidden;
+}
+.alis-glow-layer { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.alis-glow-layer::before, .alis-glow-layer::after {
+  content: ""; position: absolute; width: 60vw; height: 60vw; max-width: 700px; max-height: 700px;
+  border-radius: 50%; filter: blur(120px); opacity: 0.35;
+}
+.alis-glow-layer::before { background: radial-gradient(circle, var(--alis-teal) 0%, transparent 70%); top: -10%; left: -10%; animation: alis-drift-a 38s ease-in-out infinite alternate; }
+.alis-glow-layer::after  { background: radial-gradient(circle, var(--alis-violet) 0%, transparent 70%); bottom: -15%; right: -10%; animation: alis-drift-b 46s ease-in-out infinite alternate; }
+@keyframes alis-drift-a { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(8vw,6vh) scale(1.15); } }
+@keyframes alis-drift-b { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-6vw,-8vh) scale(1.1); } }
+
+/* ---- Small-screen fit (glass padding is larger than before) ---- */
+.grid2 > * { min-width: 0; }
+.net-worth-figure { font-size: clamp(30px, 9vw, 40px); overflow-wrap: anywhere; }
+@media (max-width: 480px) { .card { padding: 16px; } }
+
+/* ---- Header ---- */
+header.top {
+  background: rgba(5,16,13,0.62);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-bottom: 1px solid var(--glass-border);
+}
+header.top .header-left { padding-right: 190px; }
+.brand { color: var(--alis-teal-bright); text-shadow: 0 0 18px rgba(45,212,191,0.35); }
+.brand span { color: var(--alis-violet-bright); }
+.brand-sub { color: var(--alis-text-dim); }
+header.top .sync-indicator { right: 70px; top: 26px; color: var(--alis-text-dim); }
+.sync-dot.synced { box-shadow: 0 0 6px var(--alis-teal-bright); }
+
+/* ---- Settings cog (top-right, ALIS standard) ---- */
+.settings-cog {
+  position: fixed; top: 16px; right: 16px; width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--glass-border); background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--alis-teal-bright); font-size: 20px; line-height: 1; padding: 0; cursor: pointer;
+  z-index: 25; /* below modals (30) so a modal is never overlapped */
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.settings-cog:hover { transform: rotate(45deg); box-shadow: 0 0 16px rgba(34,211,238,0.3); }
+
+/* ---- Glass cards with animated iridescent ring ---- */
+@property --ring-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.card {
+  position: relative; isolation: isolate;
+  border: none; border-radius: var(--glass-radius); padding: 20px 22px;
+  background: linear-gradient(180deg, var(--glass-grad-top), var(--glass-grad-bottom));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: inset 0 1px 0 var(--glass-inset-highlight);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.card::before {
+  content: ""; position: absolute; inset: calc(var(--ring-width) * -1);
+  border-radius: inherit; padding: var(--ring-width);
+  background: conic-gradient(from var(--ring-angle), var(--alis-teal), var(--alis-violet), var(--alis-cyan-glow), var(--alis-teal));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: alis-ring-spin var(--ring-duration) linear infinite;
+  opacity: 0.55; z-index: -1; pointer-events: none;
+}
+@keyframes alis-ring-spin { to { --ring-angle: 360deg; } }
+/* stagger so rings are never in sync */
+.card:nth-child(1)::before { animation-delay: -0.5s; }
+.card:nth-child(2)::before { animation-delay: -1.3s; }
+.card:nth-child(3)::before { animation-delay: -2.4s; }
+.card:nth-child(4)::before { animation-delay: -3.1s; }
+.card:nth-child(5)::before { animation-delay: -4.2s; }
+.card:nth-child(6)::before { animation-delay: -5.0s; }
+.card:nth-child(7)::before { animation-delay: -5.8s; }
+.card:nth-child(n+8)::before { animation-delay: -6.5s; }
+.card:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 var(--glass-inset-highlight), 0 8px 28px rgba(34,211,238,0.22); }
+.card h2, .modal h3 { font-family: var(--font-head); font-weight: 700; color: var(--alis-teal-bright); }
+.card h2 { text-transform: none; letter-spacing: 0.5px; font-size: 17px; }
+.net-worth-figure { color: var(--alis-teal-bright); text-shadow: 0 0 22px rgba(45,212,191,0.25); }
+.net-worth-figure.negative { color: var(--red); text-shadow: none; }
+.row { border-bottom-color: rgba(94,234,212,0.12); }
+.row .value { color: var(--alis-teal-bright); }
+.row .value.neg { color: var(--red); }
+
+/* ---- Buttons / inputs ---- */
+button, .btn { font-family: var(--font-ui); font-size: 15px; font-weight: 600; background: rgba(255,255,255,0.05); color: var(--alis-teal-bright); border: 1px solid var(--glass-border); transition: box-shadow .2s ease, background .2s ease; }
+button:hover { box-shadow: 0 0 14px rgba(34,211,238,0.22); }
+button:active { background: rgba(94,234,212,0.14); }
+button.primary { background: linear-gradient(135deg, var(--alis-teal), var(--alis-cyan-glow)); color: var(--alis-bg); border: none; }
+button.ghost { border-color: var(--glass-border); color: var(--alis-text-dim); }
+button.danger { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.06); }
+input, select, textarea { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--alis-text); font-family: var(--font-ui); font-size: 16px; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--alis-teal-bright); box-shadow: 0 0 0 2px rgba(94,234,212,0.2); }
+select option { background: #0B1F19; color: var(--alis-text); }
+label { color: var(--alis-text-dim); }
+.muted, .empty, .sub-figure { color: var(--alis-text-dim); }
+
+/* ---- Bottom nav / FAB / modal / toast ---- */
+nav.bottom {
+  background: rgba(5,16,13,0.68);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-top: 1px solid var(--glass-border);
+}
+nav.bottom button { background: none; border: none; box-shadow: none; color: var(--alis-text-dim); font-size: 10px; }
+nav.bottom button.active { color: var(--alis-teal-bright); text-shadow: 0 0 10px rgba(45,212,191,0.5); }
+.fab { background: linear-gradient(135deg, var(--alis-teal), var(--alis-violet)); color: var(--alis-bg); box-shadow: 0 0 22px rgba(34,211,238,0.4); }
+.modal-backdrop { background: rgba(5,16,13,0.72); }
+.modal { background: linear-gradient(180deg, var(--glass-grad-top), var(--glass-grad-bottom)), #0B1F19; border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 var(--glass-inset-highlight); }
+.toast { background: #0B1F19; border: 1px solid var(--glass-border); color: var(--alis-teal-bright); box-shadow: 0 8px 28px rgba(34,211,238,0.22); }
+.pill { border-color: var(--glass-border); color: var(--alis-text-dim); }
+.pill.linked { border-color: var(--alis-cyan-glow); color: var(--alis-cyan-glow); }
+
+/* ---- Login screen: own glow so blobs show through ---- */
+#authScreen {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(45,212,191,0.28), transparent 55%),
+    radial-gradient(circle at 88% 100%, rgba(167,139,250,0.26), transparent 55%),
+    var(--alis-bg);
+}
+
+/* ---- Light mode (low-power browsers) + reduced motion ---- */
+[data-perf="light"] .alis-glow-layer { display: none; }
+[data-perf="light"] .card { background: #0B1F19; backdrop-filter: none; -webkit-backdrop-filter: none; }
+[data-perf="light"] .card::before { animation: none; opacity: 0.35; }
+[data-perf="light"] .settings-cog { backdrop-filter: none; background: #0B1F19; }
+@media (prefers-reduced-motion: reduce) {
+  .alis-glow-layer::before, .alis-glow-layer::after, .card::before { animation: none !important; }
+}
+@media print { .alis-glow-layer, .settings-cog { display: none !important; } body { background: #fff; } }
+</style>
+</head>
+<body class="alis-glass">
+<div class="alis-glow-layer" aria-hidden="true"></div>
+<div id="authScreen">
+  <div class="brand">P.E.N.<span>Y</span></div>
+  <div class="brand-sub">Personal Expense &amp; Net-worth Yield</div>
+  <div class="card" id="authCard"></div>
+</div>
+
+<button class="settings-cog" aria-label="Settings" onclick="showScreen('settings')">⚙</button>
+<header class="top">
+  <div class="header-left">
+    <div class="brand">P.E.N.<span>Y</span></div>
+    <div class="brand-sub" id="screenTitle">Dashboard</div>
+  </div>
+  <div class="sync-indicator" id="syncIndicator" onclick="showScreen('settings')" style="cursor:pointer;">
+    <span class="sync-dot none" id="syncDot"></span><span id="syncLabel">Not connected</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section class="screen active" id="screen-dashboard">
+    <div class="card">
+      <h2>Total Net Worth</h2>
+      <div class="net-worth-figure" id="netWorthFigure">£0.00</div>
+      <div class="sub-figure" id="netWorthSub">Accounts + investments + pensions</div>
+      <div id="netWorthBreakdown" style="margin-top:14px;"></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>This Month In</h2>
+        <div class="net-worth-figure" style="font-size:22px" id="monthIncome">£0.00</div>
+      </div>
+      <div class="card">
+        <h2>This Month Out</h2>
+        <div class="net-worth-figure negative" style="font-size:22px" id="monthExpense">£0.00</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Accounts</h2>
+      <div id="dashAccountsList"><div class="empty">No accounts yet — add one to get started.</div></div>
+    </div>
+    <div class="card">
+      <h2>Upcoming Bills</h2>
+      <div id="dashBillsList"><div class="empty">No bills added yet.</div></div>
+    </div>
+  </section>
+
+  <!-- ACCOUNTS -->
+  <section class="screen" id="screen-accounts">
+    <div class="card">
+      <h2>Your Accounts</h2>
+      <div id="accountsList"><div class="empty">No accounts yet.</div></div>
+    </div>
+    <button class="block" onclick="openAccountModal()">+ Add Account</button>
+
+    <div class="card" style="margin-top:14px;">
+      <h2>Investments</h2>
+      <p class="muted" style="margin-bottom:10px;">Stocks, shares, funds, ETFs, or anything else that doesn't fit as a simple account. These add into the Investments figure on your Dashboard.</p>
+      <div id="investmentsSummaryLine" style="display:none;margin-bottom:10px;">
+        <div class="row"><div class="label">Total value</div><div class="value" id="invTotalValue">£0.00</div></div>
+        <div class="row" id="invGainLossRow" style="display:none;"><div class="label">Overall gain/loss</div><div class="value" id="invGainLoss">£0.00</div></div>
+      </div>
+      <div id="investmentsList"><div class="empty">No investments added yet.</div></div>
+    </div>
+    <button class="block" onclick="openInvestmentModal()">+ Add Investment</button>
+  </section>
+
+  <!-- LEDGER -->
+  <section class="screen" id="screen-transactions">
+    <div class="card">
+      <label>Search</label>
+      <input id="transactionsSearch" placeholder="Payee or note..." oninput="loadTransactions()">
+      <div id="transactionsList"><div class="empty">No transactions yet.</div></div>
+    </div>
+  </section>
+
+  <!-- BUDGETS -->
+  <section class="screen" id="screen-budgets">
+    <div class="card">
+      <h2 id="budgetMonthLabel">Budget</h2>
+      <div id="budgetList"><div class="empty">No budgets set for this month yet.</div></div>
+    </div>
+    <button class="block" onclick="openBudgetModal()">+ Set a Budget</button>
+  </section>
+
+  <!-- BILLS -->
+  <section class="screen" id="screen-bills">
+    <div class="card">
+      <h2>Recurring Bills</h2>
+      <div id="billsList"><div class="empty">No bills yet.</div></div>
+    </div>
+    <button class="block" onclick="openBillModal()">+ Add Bill</button>
+  </section>
+
+  <!-- PLANNING -->
+  <section class="screen" id="screen-planning">
+    <div class="card">
+      <h2>Cashflow Forecast (90 days)</h2>
+      <canvas id="forecastChart"></canvas>
+      <div class="sub-figure" id="forecastSummary">—</div>
+    </div>
+    <div class="card">
+      <h2>Upcoming Events</h2>
+      <div id="forecastEvents"><div class="empty">No upcoming bills in this window.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Pension &amp; Investment Growth</h2>
+      <div id="growthChartLegend" style="display:none;margin-bottom:8px;font-family:var(--font-mono);font-size:11px;">
+        <span style="color:var(--alis-violet);">● Pensions</span>
+        <span style="color:var(--cyan);margin-left:14px;">● Investments</span>
+        <span style="color:var(--text-muted);margin-left:14px;">- - Combined</span>
+      </div>
+      <canvas id="growthChart" style="width:100%;height:200px;display:none;"></canvas>
+      <div class="sub-figure" id="growthChartSummary">Add a pension or investment, and set your date of birth, to see a projected growth chart.</div>
+    </div>
+
+    <div class="card">
+      <h2>Pensions &amp; Retirement</h2>
+      <div id="pensionNoDobNotice" style="display:none;margin-bottom:12px;">
+        <p class="muted">Add your date of birth to see a projected retirement pot and estimated income.</p>
+        <button class="block" onclick="openRetirementSettingsModal()">Set Retirement Assumptions</button>
+      </div>
+      <div id="pensionSummaryBlock" style="display:none;">
+        <div class="row"><div class="label">Current total</div><div class="value" id="pensionCurrentTotal">£0.00</div></div>
+        <div class="row"><div class="label">Projected pot at retirement</div><div class="value" id="pensionProjectedTotal">£0.00</div></div>
+        <div class="net-worth-figure" style="font-size:26px;margin-top:10px;" id="pensionMonthlyIncome">£0.00</div>
+        <div class="sub-figure" id="pensionIncomeSub">Estimated monthly income in retirement</div>
+        <p class="muted" style="margin-top:10px;">Estimate only, not financial advice — based on the growth rate, contributions and withdrawal rate you've entered. Actual outcomes depend on markets, fees, and tax rules.</p>
+        <button class="ghost block" style="margin-top:10px;" onclick="openRetirementSettingsModal()">Edit Assumptions</button>
+      </div>
+      <div id="pensionsList" style="margin-top:14px;"><div class="empty">No pensions added yet.</div></div>
+      <button class="block" style="margin-top:10px;" onclick="openPensionModal()">+ Add Pension</button>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="screen" id="screen-settings">
+    <div class="card">
+      <h2>Bank Sync (Read-Only)</h2>
+      <div class="sync-indicator" style="margin-bottom:12px;">
+        <span class="sync-dot none" id="syncDotSettings"></span><span id="syncLabelSettings">Not connected</span>
+      </div>
+      <div id="bankSyncBody"><div class="empty">Loading…</div></div>
+    </div>
+    <div class="card">
+      <h2>Import a Bank Statement</h2>
+      <p class="muted" style="margin-bottom:10px;">No bank sync needed. Download your transactions from online banking (CSV or OFX), or export from Microsoft Money or Quicken (QIF/OFX), then pick the file here. P.E.N.Y works out the layout and skips anything you've already imported.</p>
+      <input type="file" id="statementFile" accept=".csv,.ofx,.qfx,.qif,.txt" style="display:none;">
+      <button class="block" onclick="document.getElementById('statementFile').click()">Choose Statement File…</button>
+    </div>
+    <div class="card">
+      <h2>Print Summary</h2>
+      <p class="muted" style="margin-bottom:10px;">Prints an A4 landscape overview: net worth, income vs expense, category breakdown, budgets and bills.</p>
+      <label>Period</label>
+      <select id="reportType" onchange="updateReportPeriodOptions()">
+        <option value="month">Month</option><option value="year">Year</option><option value="5year">5 Years</option>
+      </select>
+      <label>Which one</label>
+      <select id="reportPeriod"></select>
+      <button class="block" onclick="printReport()">Print Summary</button>
+    </div>
+    <div class="card">
+      <h2>Security</h2>
+      <div class="row"><div class="label">Two-Factor Authentication</div><div class="value" id="twofaStatus">Off</div></div>
+      <button class="block" style="margin-top:10px;" id="twofaBtn" onclick="openTwofaSetup()">Set Up 2FA</button>
+      <button class="block ghost" style="margin-top:10px;" onclick="logout()">Log Out</button>
+    </div>
+    <div class="card">
+      <h2>Your Data</h2>
+      <label>Export format</label>
+      <select id="exportFormat">
+        <option value="json">Full Backup (JSON — for moving between P.E.N.Y instances)</option>
+        <option value="csv">Spreadsheet (CSV)</option>
+        <option value="qif">QIF (for Quicken, Money-compatible apps)</option>
+      </select>
+      <button class="block ghost" style="margin-bottom:16px;" onclick="exportData()">Export</button>
+
+      <label>Restore a full P.E.N.Y backup (JSON)</label>
+      <input type="file" id="importFile" accept="application/json" style="margin-bottom:16px;">
+
+    </div>
+    <div class="card">
+      <h2>About</h2>
+      <p class="muted">P.E.N.Y — Personal Expense &amp; Net-worth Yield.<br>Part of ALIS OS. Your data stays on your own computer or server.</p>
+      <p class="muted" style="margin-top:6px;" id="versionLabel"></p>
+    </div>
+  </section>
+
+</main>
+
+<button class="fab" id="fab" onclick="quickAdd()">+</button>
+
+<nav class="bottom">
+  <button class="active" data-screen="dashboard" onclick="showScreen('dashboard')"><span class="icon">◈</span>Home</button>
+  <button data-screen="accounts" onclick="showScreen('accounts')"><span class="icon">▤</span>Accounts</button>
+  <button data-screen="transactions" onclick="showScreen('transactions')"><span class="icon">≡</span>Transactions</button>
+  <button data-screen="budgets" onclick="showScreen('budgets')"><span class="icon">◎</span>Budgets</button>
+  <button data-screen="bills" onclick="showScreen('bills')"><span class="icon">▦</span>Bills</button>
+  <button data-screen="planning" onclick="showScreen('planning')"><span class="icon">⟿</span>Plan</button>
+  <button data-screen="settings" onclick="showScreen('settings')"><span class="icon">⚙</span>More</button>
+</nav>
+
+<!-- Generic modal shell, content injected per-action -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeModal()">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="printReport"></div>
+
+<script>
+const API = '/api';
+let accountsCache = [];
+let categoriesCache = [];
+
+// ---------- Utility ----------
+function fmt(n) {
+  const v = Number(n || 0);
+  return (v < 0 ? '-£' : '£') + Math.abs(v).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function todayMonth() { return new Date().toISOString().slice(0,7); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+function getToken() { return localStorage.getItem('peny_token'); }
+function setToken(t) { localStorage.setItem('peny_token', t); }
+function clearToken() { localStorage.removeItem('peny_token'); }
+
+async function api(path, opts) {
+  const headers = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API + path, { headers, ...opts });
+  if (res.status === 401) { clearToken(); showAuthScreen('login'); throw new Error('Please log in'); }
+  if (!res.ok) { const e = await res.json().catch(()=>({error:'Request failed'})); throw new Error(e.error || 'Request failed'); }
+  return res.json();
+}
+
+// ---------- Auth screens ----------
+function showAuthScreen(mode) {
+  document.getElementById('authScreen').style.display = 'flex';
+  const card = document.getElementById('authCard');
+  if (mode === 'register') {
+    card.innerHTML = `
+      <label>Email</label><input id="regEmail" type="email" autocomplete="email">
+      <label>Password (min 8 characters)</label><input id="regPassword" type="password" autocomplete="new-password">
+      <div class="auth-error" id="authError"></div>
+      <button class="primary block" onclick="doRegister()">Create Account</button>
+      <div class="auth-switch">Already have an account? <a onclick="showAuthScreen('login')">Log in</a></div>
+    `;
+  } else if (mode === '2fa') {
+    card.innerHTML = `
+      <label>6-digit code from your authenticator app</label><input id="loginTotp" inputmode="numeric" maxlength="6">
+      <div class="auth-error" id="authError"></div>
+      <button class="primary block" onclick="doLogin(true)">Verify</button>
+    `;
+  } else if (mode === 'reset') {
+    card.innerHTML = `
+      <label>Email</label><input id="resetEmail" type="email" autocomplete="email">
+      <label>Recovery code</label><input id="resetCode" placeholder="XXXX-XXXX-XXXX-XXXX" style="text-transform:uppercase;">
+      <label>New password (min 8 characters)</label><input id="resetNewPassword" type="password" autocomplete="new-password">
+      <div class="auth-error" id="authError"></div>
+      <button class="primary block" onclick="doResetPassword()">Reset Password</button>
+      <div class="auth-switch">Remembered it after all? <a onclick="showAuthScreen('login')">Log in</a></div>
+    `;
+  } else if (mode === 'showRecoveryCode') {
+    card.innerHTML = `
+      <p class="muted" style="margin-bottom:10px;">Your account is ready. Write down this recovery code somewhere safe — <strong style="color:var(--amber);">it's the only way back in if you ever forget your password, and P.E.N.Y can't show it to you again.</strong></p>
+      <div style="background:var(--surface);border:1px solid var(--green-dim);border-radius:8px;padding:16px;text-align:center;font-family:var(--font-mono);font-size:18px;letter-spacing:2px;color:var(--green);margin-bottom:14px;">${pendingRecoveryCode}</div>
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;"><input type="checkbox" id="recoveryAck" style="width:auto;margin:0;"> I've written this down safely</label>
+      <button class="primary block" style="margin-top:12px;" onclick="acknowledgeRecoveryCode()">Continue to Log In</button>
+    `;
+  } else {
+    card.innerHTML = `
+      <label>Email</label><input id="loginEmail" type="email" autocomplete="email">
+      <label>Password</label><input id="loginPassword" type="password" autocomplete="current-password">
+      <div class="auth-error" id="authError"></div>
+      <button class="primary block" onclick="doLogin(false)">Log In</button>
+      <div class="auth-switch">No account yet? <a onclick="showAuthScreen('register')">Create one</a> · Forgot your password? <a onclick="showAuthScreen('reset')">Reset it</a></div>
+    `;
+  }
+}
+function hideAuthScreen() { document.getElementById('authScreen').style.display = 'none'; }
+function authErr(msg) { const el = document.getElementById('authError'); if (el) el.textContent = msg; }
+
+let pendingRecoveryCode = '';
+async function doRegister() {
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  try {
+    const res = await fetch(API + '/auth/register', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
+    pendingRecoveryCode = d.recoveryCode;
+    showAuthScreen('showRecoveryCode');
+  } catch (e) { authErr(e.message); }
+}
+function acknowledgeRecoveryCode() {
+  if (!document.getElementById('recoveryAck').checked) return toast('Please confirm you\'ve saved the code first');
+  pendingRecoveryCode = '';
+  toast('Account created — log in to continue');
+  showAuthScreen('login');
+}
+
+async function doResetPassword() {
+  const email = document.getElementById('resetEmail').value.trim();
+  const recoveryCode = document.getElementById('resetCode').value.trim();
+  const newPassword = document.getElementById('resetNewPassword').value;
+  try {
+    const res = await fetch(API + '/auth/reset-password', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, recoveryCode, newPassword }) });
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
+    toast('Password reset — log in with your new password');
+    showAuthScreen('login');
+  } catch (e) { authErr(e.message); }
+}
+
+let pendingLoginEmail = '', pendingLoginPassword = '';
+async function doLogin(with2fa) {
+  const body = with2fa
+    ? { email: pendingLoginEmail, password: pendingLoginPassword, totpCode: document.getElementById('loginTotp').value }
+    : { email: document.getElementById('loginEmail').value.trim(), password: document.getElementById('loginPassword').value };
+  if (!with2fa) { pendingLoginEmail = body.email; pendingLoginPassword = body.password; }
+  try {
+    const res = await fetch(API + '/auth/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const d = await res.json();
+    if (d.error) return authErr(d.error);
+    if (d.requires2fa) return showAuthScreen('2fa');
+    setToken(d.token);
+    hideAuthScreen();
+    initApp();
+  } catch (e) { authErr(e.message); }
+}
+function logout() { clearToken(); location.reload(); }
+
+// ---------- 2FA setup (from Settings) ----------
+async function openTwofaSetup() {
+  try {
+    const res = await api('/auth/2fa/setup', { method: 'POST' });
+    openModal(`
+      <h3>Set Up 2FA</h3>
+      <p class="muted" style="margin-bottom:10px;">Scan this with Google Authenticator, Authy, or Bitwarden — or type the key in manually.</p>
+      <div style="text-align:center;margin-bottom:12px;"><img src="${res.qrDataUrl}" style="width:180px;height:180px;border-radius:8px;"></div>
+      <p class="muted" style="text-align:center;margin-bottom:12px;word-break:break-all;">${res.manualEntryKey}</p>
+      <label>Enter the 6-digit code it shows</label><input id="twofaConfirmCode" inputmode="numeric" maxlength="6">
+      <div class="modal-actions">
+        <button class="ghost" onclick="closeModal()">Cancel</button>
+        <button class="primary" onclick="confirmTwofa()">Confirm</button>
+      </div>
+    `);
+  } catch (e) { toast(e.message); }
+}
+async function confirmTwofa() {
+  const code = document.getElementById('twofaConfirmCode').value;
+  try {
+    await api('/auth/2fa/confirm', { method: 'POST', body: JSON.stringify({ code }) });
+    closeModal(); toast('2FA enabled'); 
+    document.getElementById('twofaStatus').textContent = 'On';
+    document.getElementById('twofaBtn').textContent = '2FA Enabled ✓';
+  } catch (e) { toast(e.message); }
+}
+
+// ---------- Navigation ----------
+const screenTitles = { dashboard: 'Dashboard', accounts: 'Accounts', transactions: 'Transactions', budgets: 'Budgets', bills: 'Bills', planning: 'Financial Planning', settings: 'Settings' };
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('nav.bottom button').forEach(b => b.classList.toggle('active', b.dataset.screen === name));
+  document.getElementById('screenTitle').textContent = screenTitles[name];
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'accounts') { loadAccounts(); loadInvestments(); }
+  if (name === 'transactions') loadTransactions();
+  if (name === 'budgets') loadBudgets();
+  if (name === 'bills') loadBills();
+  if (name === 'planning') { loadForecast(); loadPensions(); loadGrowthChart(); }
+  if (name === 'settings') { refreshSyncStatus(); loadBankSync(); }
+}
+
+function closeModal() { document.getElementById('modalBackdrop').classList.remove('open'); }
+function openModal(html) { document.getElementById('modalBody').innerHTML = html; document.getElementById('modalBackdrop').classList.add('open'); }
+
+// ---------- Shared data ----------
+async function refreshLookups() {
+  accountsCache = await api('/accounts');
+  categoriesCache = await api('/categories');
+}
+function accountOptions(selectedId) {
+  return accountsCache.map(a => `<option value="${a.id}" ${a.id===selectedId?'selected':''}>${a.name}</option>`).join('');
+}
+function categoryOptions(selectedId) {
+  const groups = {};
+  categoriesCache.forEach(c => { groups[c.group_name] = groups[c.group_name] || []; groups[c.group_name].push(c); });
+  return Object.keys(groups).map(g => `<optgroup label="${g}">${groups[g].map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.name}</option>`).join('')}</optgroup>`).join('');
+}
+
+// ---------- Dashboard ----------
+async function loadDashboard() {
+  await refreshLookups();
+  const nw = await api('/networth');
+  const nwb = await api('/networth/breakdown');
+
+  const figure = document.getElementById('netWorthFigure');
+  figure.textContent = fmt(nwb.totalNetWorth);
+  figure.classList.toggle('negative', nwb.totalNetWorth < 0);
+  document.getElementById('netWorthSub').textContent = 'Accounts + investments + pensions';
+
+  const b = nwb.breakdown;
+  const rows = [
+    ['Current accounts', b.current],
+    ['Savings', b.savings],
+    ['Investments', b.investment],
+    ['Retirement (pensions)', b.retirement],
+  ];
+  if (b.other) rows.push(['Other (credit/loans/cash)', b.other]);
+  document.getElementById('netWorthBreakdown').innerHTML = rows.map(([label, value]) => `
+    <div class="row"><div class="label">${label}</div><div class="value ${value<0?'neg':''}">${fmt(value)}</div></div>
+  `).join('');
+
+  const accList = document.getElementById('dashAccountsList');
+  accList.innerHTML = nw.accounts.length ? nw.accounts.map(a => `
+    <div class="row"><div class="label">${a.name}</div><div class="value ${a.balance<0?'neg':''}">${fmt(a.balance)}</div></div>
+  `).join('') : '<div class="empty">No accounts yet — add one to get started.</div>';
+
+  const month = todayMonth();
+  const txs = await api('/transactions?from=' + month + '-01&limit=1000');
+  const income = txs.filter(t=>t.amount>=0).reduce((s,t)=>s+t.amount,0);
+  const expense = txs.filter(t=>t.amount<0).reduce((s,t)=>s+t.amount,0);
+  document.getElementById('monthIncome').textContent = fmt(income);
+  document.getElementById('monthExpense').textContent = fmt(expense);
+
+  const bills = await api('/bills');
+  const billsList = document.getElementById('dashBillsList');
+  billsList.innerHTML = bills.length ? bills.slice(0,5).map(b => `
+    <div class="row"><div class="label">${b.name} <span class="muted">(day ${b.due_day})</span></div><div class="value neg">${fmt(-Math.abs(b.amount))}</div></div>
+  `).join('') : '<div class="empty">No bills added yet.</div>';
+}
+
+// ---------- Accounts ----------
+async function loadAccounts() {
+  const accounts = await api('/accounts');
+  accountsCache = accounts;
+  const el = document.getElementById('accountsList');
+  el.innerHTML = accounts.length ? accounts.map(a => `
+    <div class="row">
+      <div class="label">${a.name} <span class="muted">${a.type}</span> ${a.is_linked ? '<span class="pill linked">linked</span>' : ''}</div>
+      <div class="value">${fmt(a.starting_balance)} <button class="ghost" style="padding:4px 8px;margin-left:6px;" onclick="deleteAccount('${a.id}')">✕</button></div>
+    </div>
+  `).join('') : '<div class="empty">No accounts yet.</div>';
+}
+function openAccountModal() {
+  openModal(`
+    <h3>Add Account</h3>
+    <label>Name</label><input id="accName" placeholder="e.g. Barclays Current">
+    <label>Type</label>
+    <select id="accType">
+      <option value="current">Current</option><option value="savings">Savings</option>
+      <option value="credit">Credit Card</option><option value="loan">Loan</option>
+      <option value="investment">Investment</option><option value="cash">Cash</option>
+    </select>
+    <label>Starting Balance</label><input id="accBalance" type="number" step="0.01" value="0">
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveAccount()">Save</button>
+    </div>
+  `);
+}
+async function saveAccount() {
+  const name = document.getElementById('accName').value.trim();
+  if (!name) return toast('Give the account a name');
+  await api('/accounts', { method: 'POST', body: JSON.stringify({
+    name, type: document.getElementById('accType').value,
+    starting_balance: parseFloat(document.getElementById('accBalance').value || 0),
+  })});
+  closeModal(); toast('Account added'); loadAccounts();
+}
+async function deleteAccount(id) {
+  if (!confirm('Remove this account? Its transactions stay in history.')) return;
+  await api('/accounts/' + id, { method: 'DELETE' }); loadAccounts();
+}
+
+// ---------- Investments ----------
+async function loadInvestments() {
+  const summary = await api('/investments/summary');
+
+  const summaryLine = document.getElementById('investmentsSummaryLine');
+  summaryLine.style.display = summary.investments.length ? 'block' : 'none';
+  document.getElementById('invTotalValue').textContent = fmt(summary.totalValue);
+  const glRow = document.getElementById('invGainLossRow');
+  if (summary.totalGainLoss !== null) {
+    glRow.style.display = 'flex';
+    const glEl = document.getElementById('invGainLoss');
+    glEl.textContent = (summary.totalGainLoss >= 0 ? '+' : '') + fmt(summary.totalGainLoss);
+    glEl.classList.toggle('neg', summary.totalGainLoss < 0);
+  } else {
+    glRow.style.display = 'none';
+  }
+
+  const list = document.getElementById('investmentsList');
+  list.innerHTML = summary.investments.length ? summary.investments.map(i => `
+    <div class="row" onclick="editInvestment('${i.id}')" style="cursor:pointer;">
+      <div class="label">${i.name} <span class="muted">${i.type}</span>${i.units ? `<br><span class="muted">${i.units} units</span>` : ''}</div>
+      <div class="value">${fmt(i.currentValue)}${i.gainLoss !== null ? `<br><span class="muted ${i.gainLoss<0?'':''}" style="font-size:11px;color:${i.gainLoss<0?'var(--red)':'var(--green)'};">${i.gainLoss>=0?'+':''}${fmt(i.gainLoss)} (${i.gainLossPercent>=0?'+':''}${i.gainLossPercent.toFixed(1)}%)</span>` : ''}</div>
+    </div>
+  `).join('') : '<div class="empty">No investments added yet.</div>';
+}
+
+function openInvestmentModal(existing) {
+  const i = existing || {};
+  openModal(`
+    <h3>${existing ? 'Edit' : 'Add'} Investment</h3>
+    <label>Name</label><input id="invName" placeholder="e.g. Apple Inc (AAPL), FTSE Global All Cap Fund" value="${i.name || ''}">
+    <label>Type</label>
+    <select id="invType">
+      <option value="stock" ${i.type==='stock'?'selected':''}>Stock</option>
+      <option value="share" ${i.type==='share'?'selected':''}>Share</option>
+      <option value="fund" ${i.type==='fund'?'selected':''}>Fund</option>
+      <option value="etf" ${i.type==='etf'?'selected':''}>ETF</option>
+      <option value="bond" ${i.type==='bond'?'selected':''}>Bond</option>
+      <option value="other" ${i.type==='other'?'selected':''}>Other</option>
+    </select>
+    <label>Current Value</label><input id="invCurrentValue" type="number" step="0.01" value="${i.current_value ?? ''}">
+    <label>Purchase Value (optional, for gain/loss)</label><input id="invPurchaseValue" type="number" step="0.01" value="${i.purchase_value ?? ''}">
+    <label>Units Held (optional)</label><input id="invUnits" type="number" step="0.0001" value="${i.units ?? ''}">
+    <label>Assumed Annual Growth Rate (%, for the Plan chart)</label><input id="invGrowthRate" type="number" step="0.1" value="${i.growth_rate_percent ?? 5}">
+    <label>Notes</label><input id="invNotes" value="${i.notes || ''}">
+    <div class="modal-actions">
+      ${existing ? `<button class="danger" onclick="deleteInvestment('${i.id}')">Delete</button>` : `<button class="ghost" onclick="closeModal()">Cancel</button>`}
+      <button class="primary" onclick="saveInvestment('${i.id || ''}')">Save</button>
+    </div>
+  `);
+}
+async function saveInvestment(id) {
+  const name = document.getElementById('invName').value.trim();
+  if (!name) return toast('Give the investment a name');
+  const purchaseRaw = document.getElementById('invPurchaseValue').value;
+  const unitsRaw = document.getElementById('invUnits').value;
+  const body = {
+    name,
+    type: document.getElementById('invType').value,
+    current_value: parseFloat(document.getElementById('invCurrentValue').value || 0),
+    purchase_value: purchaseRaw === '' ? null : parseFloat(purchaseRaw),
+    units: unitsRaw === '' ? null : parseFloat(unitsRaw),
+    growth_rate_percent: parseFloat(document.getElementById('invGrowthRate').value || 5),
+    notes: document.getElementById('invNotes').value,
+  };
+  if (id) await api('/investments/' + id, { method: 'PUT', body: JSON.stringify(body) });
+  else await api('/investments', { method: 'POST', body: JSON.stringify(body) });
+  closeModal(); toast('Saved'); loadInvestments();
+}
+async function editInvestment(id) {
+  const list = await api('/investments');
+  const i = list.find(x => x.id === id);
+  openInvestmentModal(i);
+}
+async function deleteInvestment(id) {
+  await api('/investments/' + id, { method: 'DELETE' }); closeModal(); toast('Removed'); loadInvestments();
+}
+
+// ---------- Transactions ----------
+async function loadTransactions() {
+  await refreshLookups();
+  const q = document.getElementById('transactionsSearch').value;
+  const txs = await api('/transactions' + (q ? ('?q=' + encodeURIComponent(q)) : ''));
+  const el = document.getElementById('transactionsList');
+  el.innerHTML = txs.length ? txs.map(t => `
+    <div class="row" onclick="editTransaction('${t.id}')" style="cursor:pointer;">
+      <div class="label">${t.payee || 'Transaction'}<br><span class="muted">${t.date} · ${t.account_name || ''} ${t.category_name ? '· ' + t.category_name : ''}</span></div>
+      <div class="value ${t.amount<0?'neg':''}">${fmt(t.amount)}</div>
+    </div>
+  `).join('') : '<div class="empty">No transactions yet.</div>';
+}
+function openTransactionModal(existing) {
+  const t = existing || {};
+  openModal(`
+    <h3>${existing ? 'Edit' : 'Add'} Transaction</h3>
+    <label>Account</label><select id="txAccount">${accountOptions(t.account_id)}</select>
+    <label>Category</label><select id="txCategory"><option value="">—</option>${categoryOptions(t.category_id)}</select>
+    <label>Date</label><input id="txDate" type="date" value="${t.date || new Date().toISOString().slice(0,10)}">
+    <label>Amount (negative for spending)</label><input id="txAmount" type="number" step="0.01" value="${t.amount||''}">
+    <label>Payee</label><input id="txPayee" value="${t.payee||''}">
+    <label>Notes</label><input id="txNotes" value="${t.notes||''}">
+    <div class="modal-actions">
+      ${existing ? `<button class="danger" onclick="deleteTransaction('${t.id}')">Delete</button>` : `<button class="ghost" onclick="closeModal()">Cancel</button>`}
+      <button class="primary" onclick="saveTransaction('${t.id||''}')">Save</button>
+    </div>
+  `);
+}
+async function saveTransaction(id) {
+  const body = {
+    account_id: document.getElementById('txAccount').value,
+    category_id: document.getElementById('txCategory').value || null,
+    date: document.getElementById('txDate').value,
+    amount: parseFloat(document.getElementById('txAmount').value),
+    payee: document.getElementById('txPayee').value,
+    notes: document.getElementById('txNotes').value,
+  };
+  if (!body.account_id || isNaN(body.amount) || !body.date) return toast('Account, date and amount are required');
+  if (id) await api('/transactions/' + id, { method: 'PUT', body: JSON.stringify(body) });
+  else await api('/transactions', { method: 'POST', body: JSON.stringify(body) });
+  closeModal(); toast('Saved'); loadTransactions();
+}
+async function editTransaction(id) {
+  const t = (await api('/transactions')).find(x => x.id === id);
+  openTransactionModal(t);
+}
+async function deleteTransaction(id) {
+  await api('/transactions/' + id, { method: 'DELETE' }); closeModal(); toast('Deleted'); loadTransactions();
+}
+function quickAdd() {
+  const screen = document.querySelector('.screen.active').id;
+  if (screen === 'screen-bills') return openBillModal();
+  if (screen === 'screen-accounts') return openAccountModal();
+  if (screen === 'screen-budgets') return openBudgetModal();
+  openTransactionModal();
+}
+
+// ---------- Budgets ----------
+async function loadBudgets() {
+  await refreshLookups();
+  const month = todayMonth();
+  document.getElementById('budgetMonthLabel').textContent = 'Budget — ' + month;
+  const budgets = await api('/budgets/' + month);
+  const el = document.getElementById('budgetList');
+  el.innerHTML = budgets.length ? budgets.map(b => `
+    <div class="row">
+      <div class="label">${b.category}<br><span class="muted">${fmt(b.spent)} of ${fmt(b.budgeted)} spent</span></div>
+      <div class="value ${b.remaining<0?'neg':''}">${fmt(b.remaining)} left</div>
+    </div>
+  `).join('') : '<div class="empty">No budgets set for this month yet.</div>';
+}
+function openBudgetModal() {
+  openModal(`
+    <h3>Set a Budget — ${todayMonth()}</h3>
+    <label>Category</label><select id="budgetCategory">${categoryOptions()}</select>
+    <label>Monthly Amount</label><input id="budgetAmount" type="number" step="0.01">
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveBudget()">Save</button>
+    </div>
+  `);
+}
+async function saveBudget() {
+  const amount = parseFloat(document.getElementById('budgetAmount').value);
+  if (isNaN(amount)) return toast('Enter an amount');
+  await api('/budgets', { method: 'POST', body: JSON.stringify({
+    category_id: document.getElementById('budgetCategory').value, month: todayMonth(), amount,
+  })});
+  closeModal(); toast('Budget saved'); loadBudgets();
+}
+
+// ---------- Bills ----------
+async function loadBills() {
+  await refreshLookups();
+  const bills = await api('/bills');
+  const el = document.getElementById('billsList');
+  el.innerHTML = bills.length ? bills.map(b => `
+    <div class="row">
+      <div class="label">${b.name}<br><span class="muted">Day ${b.due_day} · ${b.frequency}</span></div>
+      <div class="value neg">${fmt(-Math.abs(b.amount))} <button class="ghost" style="padding:4px 8px;margin-left:6px;" onclick="deleteBill('${b.id}')">✕</button></div>
+    </div>
+  `).join('') : '<div class="empty">No bills yet.</div>';
+}
+function openBillModal() {
+  openModal(`
+    <h3>Add Bill</h3>
+    <label>Name</label><input id="billName" placeholder="e.g. Council Tax">
+    <label>Amount</label><input id="billAmount" type="number" step="0.01">
+    <label>Day of Month Due</label><input id="billDay" type="number" min="1" max="31" value="1">
+    <label>Frequency</label>
+    <select id="billFreq"><option value="monthly">Monthly</option><option value="weekly">Weekly</option><option value="yearly">Yearly</option></select>
+    <label>Category</label><select id="billCategory"><option value="">—</option>${categoryOptions()}</select>
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveBill()">Save</button>
+    </div>
+  `);
+}
+async function saveBill() {
+  const name = document.getElementById('billName').value.trim();
+  const amount = parseFloat(document.getElementById('billAmount').value);
+  if (!name || isNaN(amount)) return toast('Name and amount are required');
+  await api('/bills', { method: 'POST', body: JSON.stringify({
+    name, amount, due_day: parseInt(document.getElementById('billDay').value),
+    frequency: document.getElementById('billFreq').value,
+    category_id: document.getElementById('billCategory').value || null,
+  })});
+  closeModal(); toast('Bill added'); loadBills();
+}
+async function deleteBill(id) { await api('/bills/' + id, { method: 'DELETE' }); loadBills(); }
+
+// ---------- Planning / Forecast ----------
+async function loadForecast() {
+  const data = await api('/forecast?days=90');
+  document.getElementById('forecastSummary').textContent =
+    data.goesNegative
+      ? `⚠ Lowest projected balance: ${fmt(data.lowestPoint.balance)} around ${data.lowestPoint.date}`
+      : `Balance stays positive for the next 90 days. Lowest point: ${fmt(data.lowestPoint.balance)} on ${data.lowestPoint.date}`;
+  drawForecastChart(data.series);
+  const el = document.getElementById('forecastEvents');
+  el.innerHTML = data.events.length ? data.events.slice(0,15).map(e => `
+    <div class="row"><div class="label">${e.label} <span class="muted">${e.date}</span></div><div class="value neg">${fmt(e.amount)}</div></div>
+  `).join('') : '<div class="empty">No upcoming bills in this window.</div>';
+}
+function drawForecastChart(series) {
+  const canvas = document.getElementById('forecastChart');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 180;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,w,h);
+  if (!series.length) return;
+
+  const values = series.map(p => p.balance);
+  const min = Math.min(...values, 0), max = Math.max(...values, 0);
+  const range = (max - min) || 1;
+  const zeroY = h - ((0 - min) / range) * h;
+
+  // zero line
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(w, zeroY); ctx.stroke();
+
+  ctx.beginPath();
+  series.forEach((p, i) => {
+    const x = (i / (series.length - 1)) * w;
+    const y = h - ((p.balance - min) / range) * h;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#5EEAD4'; ctx.lineWidth = 2; ctx.stroke();
+
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0, 'rgba(94,234,212,0.25)'); grad.addColorStop(1, 'rgba(94,234,212,0)');
+  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+}
+
+// ---------- Sync indicator ----------
+function timeAgo(iso) {
+  if (!iso) return 'never';
+  const diffMs = Date.now() - new Date(iso + 'Z').getTime();
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.round(hrs / 24) + 'd ago';
+}
+async function refreshSyncStatus(syncingNow) {
+  const dot = document.getElementById('syncDot'), label = document.getElementById('syncLabel');
+  const dot2 = document.getElementById('syncDotSettings'), label2 = document.getElementById('syncLabelSettings');
+  if (syncingNow) {
+    dot.className = 'sync-dot syncing'; label.textContent = 'Syncing…';
+    if (dot2) { dot2.className = 'sync-dot syncing'; label2.textContent = 'Syncing…'; }
+    return;
+  }
+  try {
+    const status = await api('/banksync/status');
+    const set = (cls, a, b) => { dot.className = 'sync-dot ' + cls; label.textContent = a; if (dot2) { dot2.className = 'sync-dot ' + cls; label2.textContent = b || a; } };
+    if (status.state === 'none') set('none', status.configured ? 'Bank sync: no accounts linked' : 'Bank sync: not set up', status.configured ? 'No accounts linked yet' : 'Not set up');
+    else if (status.state === 'expired') set('syncing', 'Bank access expired', 'Bank access expired — reconnect below');
+    else if (status.state === 'error') set('syncing', 'Sync problem', 'Last sync had a problem — see below');
+    else set('synced', 'Synced ' + timeAgo(status.lastSyncedAt), 'Last synced ' + timeAgo(status.lastSyncedAt));
+  } catch (e) { /* not logged in yet, ignore */ }
+}
+
+// ---------- Pension & Investment Growth Chart ----------
+async function loadGrowthChart() {
+  const data = await api('/growth-projection');
+  const canvas = document.getElementById('growthChart');
+  const legend = document.getElementById('growthChartLegend');
+  const summary = document.getElementById('growthChartSummary');
+
+  if (!data.available || data.series.length < 2) {
+    canvas.style.display = 'none';
+    legend.style.display = 'none';
+    summary.textContent = 'Add a pension or investment, and set your date of birth, to see a projected growth chart.';
+    return;
+  }
+
+  canvas.style.display = 'block';
+  legend.style.display = 'block';
+  const first = data.series[0], last = data.series[data.series.length - 1];
+  summary.textContent = `Projected over ${data.horizonYears} years: ${fmt(first.combinedTotal)} → ${fmt(last.combinedTotal)} combined, based on the growth rates and contributions you've entered.`;
+
+  drawGrowthChart(data.series, data.hasPensions, data.hasInvestments);
+}
+
+function drawGrowthChart(series, hasPensions, hasInvestments) {
+  const canvas = document.getElementById('growthChart');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 200;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const allValues = series.flatMap(p => [p.pensionsTotal, p.investmentsTotal, p.combinedTotal]);
+  const maxVal = Math.max(...allValues, 1);
+  const minVal = 0;
+  const range = maxVal - minVal || 1;
+
+  const toXY = (i, value) => {
+    const x = (i / (series.length - 1)) * w;
+    const y = h - ((value - minVal) / range) * h;
+    return [x, y];
+  };
+
+  function drawLine(key, color, dashed) {
+    ctx.beginPath();
+    series.forEach((p, i) => {
+      const [x, y] = toXY(i, p[key]);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash(dashed ? [5, 4] : []);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Combined total drawn first (dashed, muted) so the two solid lines sit on top
+  drawLine('combinedTotal', 'rgba(232,245,233,0.35)', true);
+  if (hasInvestments) drawLine('investmentsTotal', '#22D3EE', false);
+  if (hasPensions) drawLine('pensionsTotal', '#A78BFA', false);
+
+  // Year labels along the bottom — show roughly 4-5 evenly spaced
+  ctx.fillStyle = '#8A9A96';
+  ctx.font = '10px monospace';
+  const labelStep = Math.max(1, Math.round(series.length / 5));
+  series.forEach((p, i) => {
+    if (i % labelStep === 0 || i === series.length - 1) {
+      const [x] = toXY(i, 0);
+      ctx.fillText(p.calendarYear, Math.min(x, w - 30), h - 4);
+    }
+  });
+}
+
+// ---------- Pensions & Retirement ----------
+async function loadPensions() {
+  const summary = await api('/pensions/summary');
+
+  document.getElementById('pensionNoDobNotice').style.display = summary.hasDateOfBirth ? 'none' : 'block';
+  document.getElementById('pensionSummaryBlock').style.display = summary.hasDateOfBirth ? 'block' : 'none';
+
+  if (summary.hasDateOfBirth) {
+    document.getElementById('pensionCurrentTotal').textContent = fmt(summary.totalCurrentValue);
+    document.getElementById('pensionProjectedTotal').textContent = summary.totalProjectedValue !== null ? fmt(summary.totalProjectedValue) : '—';
+    document.getElementById('pensionMonthlyIncome').textContent = summary.estimatedMonthlyIncome !== null ? fmt(summary.estimatedMonthlyIncome) : '—';
+    document.getElementById('pensionIncomeSub').textContent =
+      `Estimated monthly income in retirement (${summary.settings.withdrawalRatePercent}% withdrawal rate` +
+      (summary.settings.statePensionMonthly ? `, includes ${fmt(summary.settings.statePensionMonthly)}/mo state pension` : '') + ')';
+  }
+
+  const list = document.getElementById('pensionsList');
+  list.innerHTML = summary.pensions.length ? summary.pensions.map(p => `
+    <div class="row" onclick="editPension('${p.id}')" style="cursor:pointer;">
+      <div class="label">${p.name}<br><span class="muted">${fmt(p.monthlyContribution)}/mo · ${p.growthRatePercent}% growth · retires at ${p.retirementAge}</span></div>
+      <div class="value">${fmt(p.currentValue)}${p.projectedValue !== null ? `<br><span class="muted" style="font-size:11px;">→ ${fmt(p.projectedValue)}</span>` : ''}</div>
+    </div>
+  `).join('') : '<div class="empty">No pensions added yet.</div>';
+}
+
+function openPensionModal(existing) {
+  const p = existing || {};
+  openModal(`
+    <h3>${existing ? 'Edit' : 'Add'} Pension</h3>
+    <label>Name</label><input id="penName" placeholder="e.g. Workplace Pension — Aviva" value="${p.name || ''}">
+    <label>Current Value</label><input id="penValue" type="number" step="0.01" value="${p.current_value ?? ''}">
+    <label>Your Monthly Contribution</label><input id="penPersonal" type="number" step="0.01" value="${p.monthly_contribution_personal ?? 0}">
+    <label>Employer Monthly Contribution</label><input id="penEmployer" type="number" step="0.01" value="${p.monthly_contribution_employer ?? 0}">
+    <label>Assumed Annual Growth Rate (%)</label><input id="penGrowth" type="number" step="0.1" value="${p.growth_rate_percent ?? 5}">
+    <label>Retirement Age for This Pension</label><input id="penRetireAge" type="number" value="${p.retirement_age ?? 67}">
+    <label>Notes</label><input id="penNotes" value="${p.notes || ''}">
+    <div class="modal-actions">
+      ${existing ? `<button class="danger" onclick="deletePension('${p.id}')">Delete</button>` : `<button class="ghost" onclick="closeModal()">Cancel</button>`}
+      <button class="primary" onclick="savePension('${p.id || ''}')">Save</button>
+    </div>
+  `);
+}
+async function savePension(id) {
+  const body = {
+    name: document.getElementById('penName').value.trim(),
+    current_value: parseFloat(document.getElementById('penValue').value || 0),
+    monthly_contribution_personal: parseFloat(document.getElementById('penPersonal').value || 0),
+    monthly_contribution_employer: parseFloat(document.getElementById('penEmployer').value || 0),
+    growth_rate_percent: parseFloat(document.getElementById('penGrowth').value || 0),
+    retirement_age: parseInt(document.getElementById('penRetireAge').value || 67),
+    notes: document.getElementById('penNotes').value,
+  };
+  if (!body.name) return toast('Give the pension a name');
+  if (id) await api('/pensions/' + id, { method: 'PUT', body: JSON.stringify(body) });
+  else await api('/pensions', { method: 'POST', body: JSON.stringify(body) });
+  closeModal(); toast('Saved'); loadPensions(); loadGrowthChart();
+}
+async function editPension(id) {
+  const list = await api('/pensions');
+  const p = list.find(x => x.id === id);
+  openPensionModal(p);
+}
+async function deletePension(id) {
+  await api('/pensions/' + id, { method: 'DELETE' }); closeModal(); toast('Removed'); loadPensions();
+}
+
+async function openRetirementSettingsModal() {
+  const s = await api('/retirement-settings');
+  openModal(`
+    <h3>Retirement Assumptions</h3>
+    <label>Date of Birth</label><input id="retDob" type="date" value="${s.dateOfBirth || ''}">
+    <label>Withdrawal Rate at Retirement (% of pot per year)</label><input id="retWithdrawal" type="number" step="0.1" value="${s.withdrawalRatePercent}">
+    <label>State Pension (£/month, optional)</label><input id="retStatePension" type="number" step="0.01" value="${s.statePensionMonthly || 0}">
+    <p class="muted" style="margin-bottom:10px;">The withdrawal rate is a common rough guide (4% is a widely-used starting point) — not a recommendation for your situation.</p>
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveRetirementSettings()">Save</button>
+    </div>
+  `);
+}
+async function saveRetirementSettings() {
+  const body = {
+    dateOfBirth: document.getElementById('retDob').value,
+    withdrawalRatePercent: parseFloat(document.getElementById('retWithdrawal').value || 4),
+    statePensionMonthly: parseFloat(document.getElementById('retStatePension').value || 0),
+  };
+  if (!body.dateOfBirth) return toast('Date of birth is needed to project your retirement pot');
+  await api('/retirement-settings', { method: 'PUT', body: JSON.stringify(body) });
+  closeModal(); toast('Saved'); loadPensions(); loadGrowthChart();
+}
+
+// ---------- Bank sync ----------
+// ---------- Bank Sync (Enable Banking, set up entirely in the app) ----------
+function h(v) { return String(v === null || v === undefined ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function callbackUrl() { return window.location.origin + API + '/banksync/callback'; }
+let bankSetup = null;
+
+async function loadBankSync() {
+  const el = document.getElementById('bankSyncBody');
+  if (!el) return;
+  try {
+    bankSetup = await api('/banksync/setup');
+    if (!bankSetup.configured) {
+      el.innerHTML = `
+        <p class="muted" style="margin-bottom:10px;">Bring your bank transactions in automatically. Read-only — P.E.N.Y can never move money. It uses Enable Banking, which is free for your own accounts. Setup takes about 10 minutes, once, all in your web browser.</p>
+        <button class="primary block" onclick="openBankSetupWizard(1)">Set Up Bank Sync</button>`;
+      return;
+    }
+    const rows = await api('/banksync/accounts');
+    await refreshLookups();
+    const list = rows.length ? rows.map(r => {
+      const expired = r.status === 'expired' || (r.valid_until && new Date(r.valid_until) < new Date());
+      const sel = `<select style="margin:6px 0 0;" onchange="linkBankAccount('${r.id}', this.value)">
+          <option value="" ${!r.peny_account_id ? 'selected' : ''}>Don't import</option>
+          <option value="__new__">+ Create a new P.E.N.Y account</option>
+          ${accountsCache.map(a => `<option value="${a.id}" ${a.id === r.peny_account_id ? 'selected' : ''}>Feeds into: ${h(a.name)}</option>`).join('')}
+        </select>`;
+      return `<div class="row" style="display:block;">
+          <div style="display:flex;justify-content:space-between;gap:8px;">
+            <div class="label">${h(r.bank_name)} — ${h(r.name)} <span class="muted">${h(r.identifier || '')}</span></div>
+            <div class="value">${r.last_balance !== null && r.last_balance !== undefined ? fmt(r.last_balance) : ''}</div>
+          </div>
+          <div class="muted">${expired ? '<span style="color:var(--amber)">Access expired — reconnect this bank</span>' : r.last_synced_at ? 'Synced ' + timeAgo(r.last_synced_at) : 'Not synced yet'}${r.valid_until && !expired ? ' · access until ' + new Date(r.valid_until).toLocaleDateString('en-GB') : ''}</div>
+          ${r.last_error ? `<div class="muted" style="color:var(--red)">${h(r.last_error)}</div>` : ''}
+          ${sel}
+        </div>`;
+    }).join('') : '<div class="empty">Keys saved. Now connect your bank.</div>';
+    const conns = [...new Map(rows.map(r => [r.connection_id, r])).values()];
+    el.innerHTML = `
+      ${list}
+      <div class="grid2" style="margin-top:12px;">
+        <button class="primary" onclick="syncNow()">Sync Now</button>
+        <button onclick="openConnectBank()">+ Connect a Bank</button>
+      </div>
+      ${conns.length ? `<details style="margin-top:12px;"><summary class="muted" style="cursor:pointer;">Disconnect a bank</summary>
+        ${conns.map(c => `<div class="row"><div class="label">${h(c.bank_name)}</div><button class="danger" style="padding:4px 10px;" onclick="disconnectBank('${c.connection_id}')">Disconnect</button></div>`).join('')}
+      </details>` : ''}
+      <details style="margin-top:8px;"><summary class="muted" style="cursor:pointer;">Enable Banking keys</summary>
+        <p class="muted" style="margin:8px 0;">Application ID: ${h(bankSetup.appId)}</p>
+        <div class="grid2"><button class="ghost" onclick="openBankSetupWizard(4)">Change Keys</button><button class="danger" onclick="removeBankSetup()">Remove All</button></div>
+      </details>`;
+  } catch (e) {
+    el.innerHTML = `<p class="muted">${h(e.message)}</p>`;
+  }
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  const text = el.value || el.textContent;
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast('Copied'), () => { el.select && el.select(); toast('Select and copy it'); });
+}
+
+function openBankSetupWizard(step) {
+  const steps = {
+    1: `<h3>Bank Sync · Step 1 of 4</h3>
+        <p style="margin-bottom:10px;"><b>Make a free Enable Banking login.</b></p>
+        <p class="muted" style="margin-bottom:10px;">Enable Banking is the regulated company that talks to your bank. It's free when you only connect your own accounts.</p>
+        <ol class="muted" style="margin:0 0 12px 18px;line-height:1.7;">
+          <li>Open <a href="https://enablebanking.com/sign-in/" target="_blank" rel="noopener" style="color:var(--cyan)">enablebanking.com</a> and sign up with your email.</li>
+          <li>Click the link in the email they send you.</li>
+        </ol>
+        <div class="modal-actions"><button class="ghost" onclick="closeModal()">Cancel</button><button class="primary" onclick="openBankSetupWizard(2)">Done — Next</button></div>`,
+    2: `<h3>Bank Sync · Step 2 of 4</h3>
+        <p style="margin-bottom:10px;"><b>Register P.E.N.Y as your application.</b></p>
+        <ol class="muted" style="margin:0 0 10px 18px;line-height:1.7;">
+          <li>In Enable Banking's Control Panel, open <b>API applications</b> and click <b>Add a new application</b>.</li>
+          <li>Environment: <b>Production</b>. Name: <b>P.E.N.Y</b>.</li>
+          <li>In <b>Allowed redirect URLs</b>, paste this exact address:</li>
+        </ol>
+        <div style="display:flex;gap:6px;"><input id="wizRedirect" readonly value="${h(callbackUrl())}" style="margin:0;"><button onclick="copyText('wizRedirect')">Copy</button></div>
+        <ol start="4" class="muted" style="margin:10px 0 10px 18px;line-height:1.7;">
+          <li>Privacy policy and terms links: paste the same address (they aren't checked for personal use).</li>
+          <li>Leave "generate private key in the browser" ticked and click <b>Register</b>. A key file ending in <b>.pem</b> downloads — keep it, you'll need it in Step 4.</li>
+        </ol>
+        <p class="muted" style="font-size:12px;">If Enable Banking refuses the address because it isn't https, enter <b>https://example.com/peny-return</b> instead. After logging in to your bank you'll then paste the address you land on back into P.E.N.Y.</p>
+        <div class="modal-actions"><button class="ghost" onclick="openBankSetupWizard(1)">Back</button><button class="primary" onclick="openBankSetupWizard(3)">Done — Next</button></div>`,
+    3: `<h3>Bank Sync · Step 3 of 4</h3>
+        <p style="margin-bottom:10px;"><b>Link your own accounts to the application.</b></p>
+        <ol class="muted" style="margin:0 0 12px 18px;line-height:1.7;">
+          <li>On your new application, click <b>Activate by linking accounts</b>.</li>
+          <li>Choose your bank, accept the terms, and approve on your bank's own page or app.</li>
+          <li>Repeat for each bank you use. The application then shows as <b>Restricted</b> and <b>Active</b> — that's correct, and it's what keeps it free.</li>
+        </ol>
+        <div class="modal-actions"><button class="ghost" onclick="openBankSetupWizard(2)">Back</button><button class="primary" onclick="openBankSetupWizard(4)">Done — Next</button></div>`,
+    4: `<h3>Bank Sync · Step 4 of 4</h3>
+        <p style="margin-bottom:10px;"><b>Give P.E.N.Y the key.</b> It's stored encrypted, only for your login.</p>
+        <label>Application ID (from your application in the Control Panel)</label>
+        <input id="wizAppId" placeholder="e.g. 1a2b3c4d-1234-5678-9abc-1234567890ab" value="${h((bankSetup && bankSetup.appId) || '')}">
+        <label>Key file (.pem)</label>
+        <input id="wizKeyFile" type="file" accept=".pem,.key,.txt">
+        ${bankSetup && bankSetup.configured ? '<p class="muted" style="margin:-4px 0 10px;font-size:12px;">Leave empty to keep the key you already saved.</p>' : ''}
+        <label>Country of your bank</label>
+        <select id="wizCountry">${[['GB','United Kingdom'],['IE','Ireland'],['FR','France'],['DE','Germany'],['ES','Spain'],['NL','Netherlands']].map(([c,n]) => `<option value="${c}" ${(bankSetup && bankSetup.country === c) ? 'selected' : ''}>${n}</option>`).join('')}</select>
+        <details style="margin-bottom:10px;"><summary class="muted" style="cursor:pointer;">I used a different redirect address</summary>
+          <input id="wizRedirectUsed" style="margin-top:8px;" value="${h((bankSetup && bankSetup.redirectUrl && bankSetup.redirectUrl.indexOf('/banksync/callback') < 0) ? bankSetup.redirectUrl : callbackUrl())}">
+        </details>
+        <div class="auth-error" id="wizError"></div>
+        <div class="modal-actions"><button class="ghost" onclick="openBankSetupWizard(3)">Back</button><button class="primary" id="wizSaveBtn" onclick="saveBankSetup()">Save &amp; Test</button></div>`,
+  };
+  openModal(steps[step]);
+}
+
+async function saveBankSetup() {
+  const btn = document.getElementById('wizSaveBtn');
+  const err = document.getElementById('wizError');
+  err.textContent = '';
+  const file = document.getElementById('wizKeyFile').files[0];
+  const privateKey = file ? await file.text() : '';
+  btn.disabled = true; btn.textContent = 'Testing…';
+  try {
+    const r = await api('/banksync/setup', { method: 'POST', body: JSON.stringify({
+      appId: document.getElementById('wizAppId').value.trim(),
+      privateKey,
+      country: document.getElementById('wizCountry').value,
+      redirectUrl: document.getElementById('wizRedirectUsed').value.trim(),
+    })});
+    toast(`Keys work — ${r.bankCount} banks available`);
+    bankSetup = await api('/banksync/setup');
+    loadBankSync();
+    openConnectBank();
+  } catch (e) {
+    err.textContent = e.message;
+    btn.disabled = false; btn.textContent = 'Save & Test';
+  }
+}
+
+let bankListCache = [];
+async function openConnectBank() {
+  openModal(`<h3>Connect a Bank</h3><p class="muted">Loading the list of banks…</p>`);
+  try {
+    bankListCache = await api('/banksync/banks');
+    openModal(`
+      <h3>Connect a Bank</h3>
+      <p class="muted" style="margin-bottom:10px;">Choose a bank you linked in Enable Banking. You'll log in on your bank's own page. P.E.N.Y only ever gets read-only access.</p>
+      <label>Search</label><input id="bankSearch" placeholder="e.g. Barclays" oninput="filterBankList()">
+      <select id="bankPick" size="7" style="height:auto;">${bankOptions('')}</select>
+      <div class="modal-actions"><button class="ghost" onclick="closeModal()">Cancel</button><button class="primary" onclick="startBankConnect()">Continue to Bank</button></div>`);
+  } catch (e) {
+    openModal(`<h3>Connect a Bank</h3><p class="muted">${h(e.message)}</p><div class="modal-actions"><button class="ghost" onclick="closeModal()">Close</button></div>`);
+  }
+}
+function bankOptions(q) {
+  const qq = q.toLowerCase();
+  return bankListCache.filter(b => !qq || b.name.toLowerCase().includes(qq)).map((b, i) => `<option value="${h(b.name)}" data-days="${b.maxConsentDays}" ${i === 0 ? 'selected' : ''}>${h(b.name)}</option>`).join('');
+}
+function filterBankList() { document.getElementById('bankPick').innerHTML = bankOptions(document.getElementById('bankSearch').value); }
+
+let bankWaitTimer = null;
+async function startBankConnect() {
+  const pick = document.getElementById('bankPick');
+  const opt = pick.options[pick.selectedIndex];
+  if (!opt) return toast('Choose your bank first');
+  try {
+    const before = (await api('/banksync/accounts')).length;
+    const r = await api('/banksync/connect', { method: 'POST', body: JSON.stringify({ bankName: opt.value, maxConsentDays: Number(opt.dataset.days) || 90 }) });
+    window.open(r.url, '_blank', 'noopener');
+    openModal(`
+      <h3>Finish at Your Bank</h3>
+      <p class="muted" style="margin-bottom:10px;">A browser window has opened at ${h(opt.value)}. Log in and approve read-only access. When it says <b>Bank connected</b>, come back here — this updates by itself.</p>
+      <p class="muted" style="margin-bottom:6px;"><a href="${h(r.url)}" target="_blank" rel="noopener" style="color:var(--cyan)">Window didn't open? Click here.</a></p>
+      <details><summary class="muted" style="cursor:pointer;">Ended up on a page that didn't load?</summary>
+        <p class="muted" style="margin:8px 0;">Copy the whole address from that page's address bar and paste it here.</p>
+        <input id="returnedUrl" placeholder="https://…?code=…&state=…">
+        <button class="block" onclick="finishWithPastedUrl()">Finish Connecting</button>
+      </details>
+      <div class="modal-actions"><button class="ghost" onclick="stopBankWait();closeModal()">Close</button></div>`);
+    stopBankWait();
+    bankWaitTimer = setInterval(async () => {
+      try {
+        const rows = await api('/banksync/accounts');
+        if (rows.length > before) { stopBankWait(); openLinkAccounts(); }
+      } catch (_) {}
+    }, 3000);
+  } catch (e) { toast(e.message); }
+}
+function stopBankWait() { if (bankWaitTimer) { clearInterval(bankWaitTimer); bankWaitTimer = null; } }
+async function finishWithPastedUrl() {
+  try {
+    await api('/banksync/complete', { method: 'POST', body: JSON.stringify({ returnedUrl: document.getElementById('returnedUrl').value }) });
+    stopBankWait(); openLinkAccounts();
+  } catch (e) { toast(e.message); }
+}
+
+async function openLinkAccounts() {
+  await refreshLookups();
+  const rows = (await api('/banksync/accounts')).filter(r => !r.peny_account_id && r.status === 'active');
+  if (!rows.length) { closeModal(); loadBankSync(); return; }
+  openModal(`
+    <h3>Bank Connected</h3>
+    <p class="muted" style="margin-bottom:10px;">Choose where each bank account's transactions should go. New accounts start with the same balance your bank shows.</p>
+    ${rows.map(r => `
+      <label>${h(r.name)} ${h(r.identifier || '')}</label>
+      <select class="linkPick" data-id="${r.id}" data-name="${h(r.name)}">
+        ${[['current','current account'],['savings','savings account'],['credit','credit card account']].map(([t, label]) => `<option value="__new__${t}" ${guessAccountType(r.name) === t ? 'selected' : ''}>Create new ${label}</option>`).join('')}
+        ${accountsCache.map(a => `<option value="${a.id}">Add to existing: ${h(a.name)}</option>`).join('')}
+        <option value="">Don't import this one</option>
+      </select>`).join('')}
+    <div class="modal-actions"><button class="primary" onclick="saveLinkAccounts()">Save &amp; Sync</button></div>`);
+}
+function guessAccountType(name) {
+  const n = String(name || '').toLowerCase();
+  if (/sav|isa|saver|reserve|deposit|pot/.test(n)) return 'savings';
+  if (/credit|card|amex|barclaycard/.test(n)) return 'credit';
+  return 'current';
+}
+async function saveLinkAccounts() {
+  for (const sel of document.querySelectorAll('.linkPick')) {
+    const v = sel.value;
+    if (!v) continue;
+    const body = v.startsWith('__new__') ? { createNew: true, type: v.slice(7), name: sel.dataset.name } : { penyAccountId: v };
+    await api('/banksync/accounts/' + sel.dataset.id + '/link', { method: 'POST', body: JSON.stringify(body) });
+  }
+  closeModal();
+  await syncNow();
+}
+async function linkBankAccount(remoteId, value) {
+  try {
+    const body = value === '__new__' ? { createNew: true, type: 'current' } : { penyAccountId: value || null };
+    await api('/banksync/accounts/' + remoteId + '/link', { method: 'POST', body: JSON.stringify(body) });
+    toast(value ? 'Saved' : 'This account will no longer be imported');
+    loadBankSync();
+  } catch (e) { toast(e.message); }
+}
+async function syncNow(silent) {
+  refreshSyncStatus(true);
+  try {
+    const r = await api('/banksync/sync', { method: 'POST' });
+    if (!silent) toast(r.problems && r.problems.length ? r.problems[0] : `Synced — ${r.added} new transaction${r.added === 1 ? '' : 's'}`);
+  } catch (e) { if (!silent) toast(e.message); }
+  refreshSyncStatus();
+  if (document.getElementById('screen-settings').classList.contains('active')) loadBankSync();
+  if (document.getElementById('screen-dashboard').classList.contains('active')) loadDashboard();
+}
+async function disconnectBank(connectionId) {
+  if (!confirm('Disconnect this bank? Transactions already imported stay in P.E.N.Y.')) return;
+  await api('/banksync/connections/' + connectionId, { method: 'DELETE' });
+  toast('Bank disconnected'); loadBankSync(); refreshSyncStatus();
+}
+async function removeBankSetup() {
+  if (!confirm('Remove your Enable Banking keys and disconnect all banks? Imported transactions stay in P.E.N.Y.')) return;
+  await api('/banksync/setup', { method: 'DELETE' });
+  toast('Bank sync removed'); loadBankSync(); refreshSyncStatus();
+}
+// Quietly sync when the app opens, at most every 6 hours (banks limit how often they can be checked)
+async function autoSyncIfDue() {
+  try {
+    const st = await api('/banksync/status');
+    if (st.state === 'none' || st.state === 'expired') return;
+    if (!st.lastSyncedAt || (Date.now() - new Date(st.lastSyncedAt + 'Z').getTime()) > 6 * 3600000) syncNow(true);
+  } catch (_) {}
+}
+
+// ---------- Export / Import ----------
+async function exportData() {
+  const format = document.getElementById('exportFormat').value;
+  const ext = format === 'csv' ? 'csv' : format === 'qif' ? 'qif' : 'json';
+  const res = await fetch(API + '/export?format=' + format, {
+    headers: { Authorization: 'Bearer ' + getToken() },
+  });
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'peny-export.' + ext; a.click();
+  toast('Exported as ' + ext.toUpperCase());
+}
+document.getElementById('importFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const text = await file.text();
+  try {
+    await api('/import', { method: 'POST', body: text });
+    toast('Backup restored'); loadDashboard();
+  } catch (err) { toast('Import failed: ' + err.message); }
+});
+
+// ---------- Statement import (CSV / OFX / QIF) ----------
+let pendingStatement = null;
+function ukDate(iso) { if (!iso) return '—'; const [y, m, d] = String(iso).split('-'); return d ? `${d}/${m}/${y}` : iso; }
+async function populateStatementAccountPicker() { await refreshLookups(); }
+document.getElementById('statementFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  e.target.value = '';
+  pendingStatement = { filename: file.name, content: await file.text(), flipSigns: false, dayFirst: true };
+  await refreshLookups();
+  previewStatement();
+});
+async function previewStatement() {
+  const st = pendingStatement;
+  try {
+    const p = await api('/import/preview', { method: 'POST', body: JSON.stringify({ format: 'auto', ...st }) });
+    st.format = p.format;
+    openModal(`
+      <h3>Import Statement</h3>
+      <p class="muted" style="margin-bottom:8px;">${h(st.filename)}<br>${h(p.detected)}</p>
+      <div class="row"><div class="label">Transactions found</div><div class="value">${p.count}</div></div>
+      <div class="row"><div class="label">Dates</div><div class="value">${ukDate(p.from)} to ${ukDate(p.to)}</div></div>
+      <div class="row"><div class="label">Money in</div><div class="value">${fmt(p.moneyIn)}</div></div>
+      <div class="row"><div class="label">Money out</div><div class="value neg">${fmt(p.moneyOut)}</div></div>
+      <div style="margin:10px 0;">${p.sample.map(r => `<div class="row"><div class="label">${ukDate(r.date)} · ${h(r.payee || r.memo || '')}</div><div class="value ${r.amount < 0 ? 'neg' : ''}">${fmt(r.amount)}</div></div>`).join('')}</div>
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;">
+        <input type="checkbox" style="width:auto;margin:0;" ${st.flipSigns ? 'checked' : ''} onchange="pendingStatement.flipSigns=this.checked;previewStatement()"> Spending shows as positive (some credit card files) — flip it
+      </label>
+      ${p.format === 'qif' ? `<label style="display:flex;align-items:center;gap:8px;text-transform:none;">
+        <input type="checkbox" style="width:auto;margin:0;" ${st.dayFirst ? 'checked' : ''} onchange="pendingStatement.dayFirst=this.checked;previewStatement()"> Dates are day/month/year (UK)
+      </label>` : ''}
+      <label style="margin-top:8px;">Put these into</label>
+      <select id="stmtAccount">
+        ${accountsCache.map(a => `<option value="${a.id}">${h(a.name)}</option>`).join('')}
+        <option value="__new__">+ Create a new account</option>
+      </select>
+      <div class="modal-actions"><button class="ghost" onclick="closeModal()">Cancel</button><button class="primary" id="stmtImportBtn" ${p.count ? '' : 'disabled'} onclick="importStatement()">Import ${p.count}</button></div>`);
+  } catch (err) {
+    openModal(`<h3>Import Statement</h3><p class="muted">${h(err.message)}</p><div class="modal-actions"><button class="ghost" onclick="closeModal()">Close</button></div>`);
+  }
+}
+async function importStatement() {
+  let account_id = document.getElementById('stmtAccount').value;
+  const btn = document.getElementById('stmtImportBtn'); btn.disabled = true; btn.textContent = 'Importing…';
+  try {
+    if (account_id === '__new__') {
+      const name = prompt('Name for the new account', pendingStatement.filename.replace(/\.[^.]+$/, '')) || 'Imported account';
+      const acc = await api('/accounts', { method: 'POST', body: JSON.stringify({ name, type: 'current', starting_balance: 0 }) });
+      account_id = acc.id;
+    }
+    const r = await api('/import/statement', { method: 'POST', body: JSON.stringify({ ...pendingStatement, account_id }) });
+    closeModal();
+    toast(`Imported ${r.added} transaction${r.added === 1 ? '' : 's'}` + (r.skipped ? `, skipped ${r.skipped} already in P.E.N.Y` : ''));
+    pendingStatement = null;
+    loadDashboard();
+  } catch (err) { toast('Import failed: ' + err.message); btn.disabled = false; btn.textContent = 'Import'; }
+}
+
+// ---------- Reports / Print ----------
+function updateReportPeriodOptions() {
+  const type = document.getElementById('reportType').value;
+  const sel = document.getElementById('reportPeriod');
+  const now = new Date();
+  let options = [];
+  if (type === 'month') {
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = d.toISOString().slice(0,7);
+      options.push(`<option value="${key}">${d.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</option>`);
+    }
+  } else if (type === 'year') {
+    for (let i = 0; i < 6; i++) { const y = now.getFullYear() - i; options.push(`<option value="${y}">${y}</option>`); }
+  } else {
+    for (let i = 0; i < 3; i++) { const y = now.getFullYear() - (i*5); options.push(`<option value="${y}">${y}–${y+4}</option>`); }
+  }
+  sel.innerHTML = options.join('');
+}
+async function printReport() {
+  const type = document.getElementById('reportType').value;
+  const period = document.getElementById('reportPeriod').value;
+  try {
+    const r = await api(`/reports/${type}/${period}`);
+    const printedAt = new Date().toLocaleString('en-GB');
+    const html = `
+      <div class="print-header">
+        <div class="print-logo">
+          <span style="color:#00b05a;">P.E.N.</span><span style="color:#0097a7;">Y</span>
+        </div>
+        <div>
+          <h1>P.E.N.Y — Financial Summary</h1>
+          <div class="meta">${r.label} · report data as of ${new Date(r.generatedAt).toLocaleString('en-GB')}</div>
+          <div class="meta">Printed: ${printedAt}</div>
+        </div>
+      </div>
+      <div class="print-grid">
+        <div>
+          <h2>Net Worth</h2>
+          <div class="print-figure">£${r.netWorth.toFixed(2)}</div>
+          <table><tbody>
+            ${r.netWorthByAccount.map(a=>`<tr><td>${a.name}</td><td style="text-align:right;">£${a.balance.toFixed(2)}</td></tr>`).join('')}
+          </tbody></table>
+        </div>
+        <div>
+          <h2>Income vs Expense</h2>
+          <table><tbody>
+            <tr><td>Income</td><td style="text-align:right;">£${r.income.toFixed(2)}</td></tr>
+            <tr><td>Expense</td><td style="text-align:right;">£${r.expense.toFixed(2)}</td></tr>
+            <tr><td><strong>Net</strong></td><td style="text-align:right;"><strong>£${r.net.toFixed(2)}</strong></td></tr>
+          </tbody></table>
+          <h2>Bills</h2>
+          <table><tbody>
+            ${r.bills.map(b=>`<tr><td>${b.name}</td><td style="text-align:right;">£${b.amount.toFixed(2)} / ${b.frequency}</td></tr>`).join('') || '<tr><td>No active bills</td></tr>'}
+          </tbody></table>
+        </div>
+        <div>
+          <h2>Spending by Category</h2>
+          <table><thead><tr><th>Category</th><th>Spent</th></tr></thead><tbody>
+            ${r.categoryBreakdown.map(c=>`<tr><td>${c.name}</td><td style="text-align:right;">£${c.spent.toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="2">No transactions this period</td></tr>'}
+          </tbody></table>
+          ${r.budgetPerformance.length ? `<h2>Budget vs Actual</h2><table><thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>Left</th></tr></thead><tbody>
+            ${r.budgetPerformance.map(b=>`<tr><td>${b.category}</td><td style="text-align:right;">£${b.budgeted.toFixed(2)}</td><td style="text-align:right;">£${b.spent.toFixed(2)}</td><td style="text-align:right;">£${b.remaining.toFixed(2)}</td></tr>`).join('')}
+          </tbody></table>` : ''}
+        </div>
+      </div>
+    `;
+    document.getElementById('printReport').innerHTML = html;
+    setTimeout(() => window.print(), 100);
+  } catch (e) { toast(e.message); }
+}
+
+// ---------- PWA install ----------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+}
+
+const APP_VERSION = '1.9.0';
+const APP_EDITION = 'Server Edition';
+
+// ---------- Init ----------
+function initApp() {
+  updateReportPeriodOptions();
+  refreshSyncStatus();
+  loadDashboard();
+  const vEl = document.getElementById('versionLabel');
+  if (vEl) vEl.textContent = `Version ${APP_VERSION} — ${APP_EDITION}`;
+  fetch(API + '/health').then(r => r.json()).then(hh => { if (vEl && hh.edition) vEl.textContent = `Version ${APP_VERSION} — ${hh.edition}`; }).catch(() => {});
+  autoSyncIfDue();
+}
+if (getToken()) { hideAuthScreen(); initApp(); }
+else { showAuthScreen('login'); }
+</script>
+</body>
+</html>
