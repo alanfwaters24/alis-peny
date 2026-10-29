@@ -24,6 +24,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history, so we can tell which copy of a file is newest
 
       - uses: actions/setup-node@v4
         with:
@@ -31,21 +33,43 @@ jobs:
 
       - name: Put files into backend and frontend folders
         run: |
-          # GitHub's web uploader flattens folders, so sort files back where they belong.
+          # GitHub's web uploader sometimes flattens folders and sometimes keeps them,
+          # so the same file can exist twice (e.g. server.js AND backend/server.js).
+          # Rule: whichever copy was uploaded most recently wins.
           mkdir -p backend frontend
+          place() {
+            f="$1"; dest="$2/$1"
+            if [ -f "$dest" ]; then
+              top=$(git log -1 --format=%ct -- "$f"); sub=$(git log -1 --format=%ct -- "$dest")
+              if [ "${top:-0}" -gt "${sub:-0}" ]; then
+                echo "Using newer top-level $f"; mv -f "$f" "$dest"
+              else
+                echo "Keeping $dest (newer than the top-level copy)"; rm -f "$f"
+              fi
+            else
+              mv "$f" "$dest"
+            fi
+          }
           for f in *.js; do
             case "$f" in
-              main.js) ;;                          # Electron start file stays at the top
-              sw.js) mv -f "$f" frontend/ ;;       # service worker belongs with the web page
-              *) mv -f "$f" backend/ ;;            # everything else is the engine
+              main.js) ;;                       # Electron start file stays at the top
+              sw.js) place "$f" frontend ;;     # service worker belongs with the web page
+              *) place "$f" backend ;;          # everything else is the engine
             esac
           done
           for f in index.html manifest.json icon-192.png icon-512.png; do
-            if [ -f "$f" ]; then mv -f "$f" frontend/; fi
+            if [ -f "$f" ]; then place "$f" frontend; fi
           done
           rm -f backend/gocardless.js package-lock.json   # old bank sync (replaced in 1.9.0)
           echo "backend:";  ls backend
           echo "frontend:"; ls frontend
+
+      - name: Check this is the 1.9.0 engine, not an old copy
+        run: |
+          if grep -q "require('./gocardless')" backend/server.js; then
+            echo "backend/server.js is an OLD version (still uses GoCardless). Upload the 1.9.0 server.js and run again."; exit 1
+          fi
+          grep -q "enablebanking" backend/server.js && echo "Engine is 1.9.0 or later"
 
       - name: Check all app files are present
         run: |
