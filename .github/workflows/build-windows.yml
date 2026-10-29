@@ -31,14 +31,19 @@ jobs:
 
       - name: Put files into backend and frontend folders
         run: |
+          # GitHub's web uploader flattens folders, so sort files back where they belong.
           mkdir -p backend frontend
-          for f in server.js db.js auth.js forecast.js pensions.js investments.js growth.js reports.js importers.js exporters.js gocardless.js; do
-            if [ -f "$f" ]; then mv -f "$f" backend/; fi
+          for f in *.js; do
+            case "$f" in
+              main.js) ;;                          # Electron start file stays at the top
+              sw.js) mv -f "$f" frontend/ ;;       # service worker belongs with the web page
+              *) mv -f "$f" backend/ ;;            # everything else is the engine
+            esac
           done
-          for f in index.html sw.js manifest.json icon-192.png icon-512.png; do
+          for f in index.html manifest.json icon-192.png icon-512.png; do
             if [ -f "$f" ]; then mv -f "$f" frontend/; fi
           done
-          rm -f package-lock.json
+          rm -f backend/gocardless.js package-lock.json   # old bank sync (replaced in 1.9.0)
           echo "backend:";  ls backend
           echo "frontend:"; ls frontend
 
@@ -48,7 +53,7 @@ jobs:
           for f in main.js package.json icon.ico \
                    backend/server.js backend/db.js backend/auth.js backend/forecast.js backend/pensions.js \
                    backend/investments.js backend/growth.js backend/reports.js backend/importers.js \
-                   backend/exporters.js backend/gocardless.js \
+                   backend/exporters.js backend/enablebanking.js backend/secretbox.js \
                    frontend/index.html frontend/sw.js frontend/manifest.json; do
             if [ ! -f "$f" ]; then echo "MISSING FILE: $f"; missing=1; fi
           done
